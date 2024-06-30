@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+
+        .game-board {
+            width: 400px;
+            height: 400px;
+            background-color: #000;
+            position: relative;
+        }
+
+        .snake, .food {
+            width: 20px;
+            height: 20px;
+            position: absolute;
+        }
+
+        .snake {
+            background-color: green;
+        }
+
+        .food {
+            background-color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-board" id="game-board"></div>
+    <script>
+        const gameBoard = document.getElementById('game-board');
+        const boardSize = 20;  // Kích thước của game board
+        const tileSize = gameBoard.offsetWidth / boardSize;
+
+        let snake = [{ x: 0, y: 0 }];  // Vị trí bắt đầu của con rắn
+        let direction = { x: 0, y: 0 };  // Hướng di chuyển
+        let food = { x: Math.floor(Math.random() * boardSize), y: Math.floor(Math.random() * boardSize) };
+        let score = 0;
+
+        document.addEventListener('keydown', changeDirection);
+        setInterval(gameLoop, 100);
+
+        function gameLoop() {
+            updateSnake();
+            checkCollision();
+            draw();
+        }
+
+        function changeDirection(event) {
+            switch (event.keyCode) {
+                case 37: // Trái
+                    if (direction.x === 0) direction = { x: -1, y: 0 };
+                    break;
+                case 38: // Lên
+                    if (direction.y === 0) direction = { x: 0, y: -1 };
+                    break;
+                case 39: // Phải
+                    if (direction.x === 0) direction = { x: 1, y: 0 };
+                    break;
+                case 40: // Xuống
+                    if (direction.y === 0) direction = { x: 0, y: 1 };
+                    break;
+            }
+        }
+
+        function updateSnake() {
+            const newHead = {
+                x: (snake[0].x + direction.x + boardSize) % boardSize,
+                y: (snake[0].y + direction.y + boardSize) % boardSize
+            };
+            snake.unshift(newHead);
+
+            // Kiểm tra nếu con rắn ăn thức ăn
+            if (newHead.x === food.x && newHead.y === food.y) {
+                score++;
+                food = { x: Math.floor(Math.random() * boardSize), y: Math.floor(Math.random() * boardSize) };
+            } else {
+                snake.pop();
+            }
+        }
+
+        function checkCollision() {
+            for (let i = 1; i < snake.length; i++) {
+                if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) {
+                    alert('Game Over! Your score is ' + score);
+                    snake = [{ x: 10, y: 10 }];
+                    direction = { x: 0, y: 0 };
+                    score = 0;
+                }
+            }
+        }
+
+        function draw() {
+            gameBoard.innerHTML = '';
+
+            snake.forEach(segment => {
+                const snakeElement = document.createElement('div');
+                snakeElement.style.left = segment.x * tileSize + 'px';
+                snakeElement.style.top = segment.y * tileSize + 'px';
+                snakeElement.classList.add('snake');
+                gameBoard.appendChild(snakeElement);
+            });
+
+            const foodElement = document.createElement('div');
+            foodElement.style.left = food.x * tileSize + 'px';
+            foodElement.style.top = food.y * tileSize + 'px';
+            foodElement.classList.add('food');
+            gameBoard.appendChild(foodElement);
+        }
+    </script>
+</body>
+</html>
